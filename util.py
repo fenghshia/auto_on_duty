@@ -1,11 +1,11 @@
 import os
 import time
 import aircv as ac
-# import pymouse
-# import pykeyboard
+import pymouse
+import pykeyboard
 from PIL import ImageGrab
-# m = pymouse.PyMouse()
-# k = pykeyboard.PyKeyboard()
+m = pymouse.PyMouse()
+k = pykeyboard.PyKeyboard()
 
 scream_locat = "./tmp/scream.jpg"
 

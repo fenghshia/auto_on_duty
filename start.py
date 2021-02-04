@@ -9,6 +9,7 @@ from socket import gethostname, gethostbyname
 from browser import key, vrbt
 from keydata import jetty_data, webgate, frontpage, login, restime, search, vrbt1, vrbt2, vrbt3, vrbt4
 from datetime import datetime
+from autoemail import autoemail
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -21,7 +22,7 @@ app.config.from_object(config())
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
-
+mail = autoemail()
 
 # 发送消息
 def sendmsg():
@@ -76,7 +77,9 @@ def webdata(key_cookie, vrbt_cookie):
     for i in keydata:
         i.judge()
         if i.status == False:
+            mail.build_msg(f"{i.name}数据异常")
             return False
+        mail.build_msg(f"{i.name}数据正常")
     return True
 
     
@@ -86,17 +89,21 @@ now = datetime.now()
                 start_date=f"{now.year}-{now.month}-{duty_day} 09:30:10",
                 end_date=f"{now.year}-{now.month}-{duty_day+1} 09:00:20",
                 trigger="interval",
-                minutes=1,
+                minutes=30,
                 id='basejob')
 def workflow(key_cookie, vrbt_cookie):
+    mail.build_msg(now)
     if webdata(key_cookie, vrbt_cookie):
         sendmsg()
+        mail.build_msg("微信消息已发送")
     else:
         alert("alertmusic.mp3")
+        mail.build_msg("告警已触发")
+    mail.send()
 
-@scheduler.task(args=["外部插入"], end_date="2021-02-04 17:10:20", trigger="interval", minutes=1, id='testjob')
+@scheduler.task(args=["外部插入"], end_date="2021-02-04 17:50:20", trigger="interval", minutes=1, id='testjob')
 def test(s):
-    print(f"{datetime.now()}还在执行!{s}")
+    pass
 
 # 告警接口
 @app.route("/alert")

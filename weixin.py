@@ -47,19 +47,4 @@ class zhonghualong(weixin):
         stick()
 
 if __name__ == "__main__":
-    # autosendmsg(context(), weixin(), edge(), filefolder())
     zhibanqun().self_open()
-    # 生成文本内容:ok
-    # 复制文本内容:ok
-    # 打开微信:ok
-    # 粘贴文本内容:ok
-    # 打开edge:
-    # 切换窗口
-    # 截屏
-    # 裁剪
-    # 打开文件夹
-    # 复制图片
-    # 打开微信
-    # 粘贴图片
-    # 打开edge
-    # 切换
