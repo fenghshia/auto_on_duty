@@ -1,12 +1,26 @@
 from util import alert
 from time import sleep
-from weixin import zhonghualong, zhibanqun
-from vscode import context
+from flask import Flask
+from config import *
 from folder import folder
+from vscode import context
+from weixin import zhonghualong, zhibanqun
+from socket import gethostname, gethostbyname
 from browser import key, vrbt
 from keydata import jetty_data, webgate, frontpage, login, restime, search, vrbt1, vrbt2, vrbt3, vrbt4
 from datetime import datetime
+from flask_apscheduler import APScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
+
+
+class config:
+    SCHEDULER_API_ENABLED = True
+
+app=Flask(__name__)
+app.config.from_object(config())
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 
 # 发送消息
@@ -16,19 +30,15 @@ def sendmsg():
     fd = folder()
     ky = key()
     vt = vrbt()
-
     # 1.刷新
     ky.flash()
     vt.flash()
-
     # 2.复制文本
     ct.copycontext()
     wx.self_stick()
-
     # 3.截图
     ky.cut()
     vt.cut()
-
     # 4.复制图片
     fd.get_key()
     wx.self_stick()
@@ -69,34 +79,37 @@ def webdata(key_cookie, vrbt_cookie):
             return False
     return True
 
-
-# 时间规整
-def plantime():
-    now = datetime.now()
-    if now.minute <=30:
-        sleep((31 - now.minute)*60)
-    elif 30 < now.minute <= 60:
-        sleep((61 - now.minute)*60)
     
 # 整体流程
+now = datetime.now()
+@scheduler.task(args=[key_cookie, vrbt_cookie],
+                start_date=f"{now.year}-{now.month}-{duty_day} 09:30:10",
+                end_date=f"{now.year}-{now.month}-{duty_day+1} 09:00:20",
+                trigger="interval",
+                minutes=1,
+                id='basejob')
 def workflow(key_cookie, vrbt_cookie):
     if webdata(key_cookie, vrbt_cookie):
         sendmsg()
     else:
         alert("alertmusic.mp3")
 
+@scheduler.task(args=["外部插入"], end_date="2021-02-04 17:10:20", trigger="interval", minutes=1, id='testjob')
+def test(s):
+    print(f"{datetime.now()}还在执行!{s}")
 
-def test():
-    print(f"{datetime.now()}还在执行!")
+# 告警接口
+@app.route("/alert")
+def api_alert():
+    alert("alertmusic.mp3")
+    return "success"
+
+
 if __name__ == "__main__":
-    key_cookie = "SL_GWPT_Show_Hide_tmp=1; SL_G_WPT_TO=en; SL_wptGlobTipTmp=1; grafana_session=342bd7aa24c9bd9ee5d186dd2fd4d893"
-    vrbt_cookie = "SL_G_WPT_TO=zh; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; grafana_session=a56812284747bf1a4f0a32cf1a3d20cd"
-    # plantime()
-    # workflow(key_cookie, vrbt_cookie)
-    scheduler = BlockingScheduler()
-    # scheduler.add_job(workflow, "interval", minutes=30, args=[key_cookie, vrbt_cookie], id='basejob')
-    scheduler.add_job(test, "interval", minutes=1, start_date="2021-02-03 17:59:00", end_date="2021-02-03 18:05:00", id='basejob')
-    scheduler.start()
+    localIP = gethostbyname(gethostname())
+    app.run(host="192.168.151.196",
+            port=6900,
+            debug=False)
 
 
 

@@ -1,18 +1,18 @@
 import os
 import time
 import aircv as ac
-import pymouse
-import pykeyboard
+# import pymouse
+# import pykeyboard
 from PIL import ImageGrab
-m = pymouse.PyMouse()
-k = pykeyboard.PyKeyboard()
+# m = pymouse.PyMouse()
+# k = pykeyboard.PyKeyboard()
 
 scream_locat = "./tmp/scream.jpg"
 
 def install_pack():
-    pack_list = ["PyUserInput", "apschedule", "Pillow", "aircv"]
+    pack_list = ["PyUserInput", "apschedule", "Pillow", "aircv", "opencv-python", "Flask", "Flask-APScheduler"]
     packs = " ".join(pack_list)
-    os.system(f"python -m pip install --upgrade {packs}")
+    os.system(f"python -m pip install --upgrade {packs} -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com")
 
 def ctrlnimble(*args):
     time.sleep(1)

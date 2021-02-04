@@ -1,9 +1,5 @@
 from util import *
-# aircv
-# open-cv2
-# userinput
-# pill
-# apscheduler
+
 class weixin:
 
     def __init__(self):
